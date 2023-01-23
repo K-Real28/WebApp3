@@ -50,9 +50,9 @@ namespace WebApp3.Controllers
         // GET: Groups/Create
         public IActionResult Create()
         {
-            ViewData["CourseId"] = new SelectList(_context.Courses, "ID", "ID");
-            ViewData["CuratorId"] = new SelectList(_context.Teachers, "Id", "Id");
-            ViewData["SpecialId"] = new SelectList(_context.Specials, "Id", "Id");
+            ViewData["Course"] = new SelectList(_context.Courses, "Id", "Name");
+            ViewData["Curator"] = new SelectList(_context.Teachers, "Id", "Name");
+            ViewData["Special"] = new SelectList(_context.Specials, "Id", "Name");
             return View();
         }
 
@@ -69,9 +69,9 @@ namespace WebApp3.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "ID", "ID", group.CourseId);
-            ViewData["CuratorId"] = new SelectList(_context.Teachers, "Id", "Id", group.CuratorId);
-            ViewData["SpecialId"] = new SelectList(_context.Specials, "Id", "Id", group.SpecialId);
+            ViewData["Course"] = new SelectList(_context.Courses, "Id", "Name", group.CourseId);
+            ViewData["Curator"] = new SelectList(_context.Teachers, "Id", "Name", group.CuratorId);
+            ViewData["Special"] = new SelectList(_context.Specials, "Id", "Name", group.SpecialId);
             return View(group);
         }
 

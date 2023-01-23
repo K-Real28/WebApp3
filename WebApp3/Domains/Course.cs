@@ -2,9 +2,9 @@
 {
     public class Course
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
 
-        public IList<Group> Groups { get; set; } = new List<Group>();
+        public IList<Group>? Groups { get; set; } = new List<Group>();
     }
 }

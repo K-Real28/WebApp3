@@ -28,7 +28,7 @@ namespace WebApp3.Controllers
         // GET: Teachers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Teachers == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -68,7 +68,7 @@ namespace WebApp3.Controllers
         // GET: Teachers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Teachers == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -119,7 +119,7 @@ namespace WebApp3.Controllers
         // GET: Teachers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Teachers == null)
+            if (id == null)
             {
                 return NotFound();
             }

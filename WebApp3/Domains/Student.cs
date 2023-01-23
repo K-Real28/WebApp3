@@ -7,6 +7,6 @@
         public int phone { get; set; }
         public string photo { get; set; }
 
-        public Group Group { get; set; }
+        public Group? Group { get; set; }
     }
 }
