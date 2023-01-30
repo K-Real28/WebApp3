@@ -1,9 +1,9 @@
-﻿namespace WebApp3.Domains
+﻿using WebApp3.Domains.BaseModels;
+
+namespace WebApp3.Domains
 {
-    public class Student
+    public class Student : NameBaseEnity
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
         public int phone { get; set; }
         public string photo { get; set; }
 

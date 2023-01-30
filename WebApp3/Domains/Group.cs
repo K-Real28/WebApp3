@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using WebApp3.Domains.BaseModels;
 
 namespace WebApp3.Domains
 {
-    public class Group
+    public class Group : NameBaseEnity
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
         public int Year { get; set; }
 
         [ForeignKey("Curator")]
