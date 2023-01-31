@@ -7,22 +7,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApp3;
 using WebApp3.Domains;
+using WebApp3.Interfaces;
+using WebApp3.Services;
 
 namespace WebApp3.Controllers
 {
     public class CoursesController : Controller
     {
-        private readonly AppDbContext _context;
-
-        public CoursesController(AppDbContext context)
+        private readonly ICourseService _courseService;
+        
+        public CoursesController(ICourseService courseService)
         {
-            _context = context;
+            _courseService = courseService;
         }
 
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Courses.ToListAsync());
+              return View(await _courseService.GetCourses());
         }
 
         // GET: Courses/Details/5
@@ -32,9 +34,8 @@ namespace WebApp3.Controllers
             {
                 return NotFound();
             }
-
-            var course = await _context.Courses
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var course = await _courseService.GetById((int)id);
+                
             if (course == null)
             {
                 return NotFound();
@@ -54,12 +55,11 @@ namespace WebApp3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name")] Course course)
+        public async Task<IActionResult> Create(Course course)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(course);
-                await _context.SaveChangesAsync();
+                await _courseService.Create(course);
                 return RedirectToAction(nameof(Index));
             }
             return View(course);
@@ -68,12 +68,12 @@ namespace WebApp3.Controllers
         // GET: Courses/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Courses == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var course = await _context.Courses.FindAsync(id);
+            var course = await _courseService.GetById((int)id);
             if (course == null)
             {
                 return NotFound();
@@ -86,7 +86,7 @@ namespace WebApp3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Course course)
+        public async Task<IActionResult> Edit(int id, Course course)
         {
             if (id != course.Id)
             {
@@ -97,19 +97,11 @@ namespace WebApp3.Controllers
             {
                 try
                 {
-                    _context.Update(course);
-                    await _context.SaveChangesAsync();
+                    await _courseService.Edit(course);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CourseExists(course.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,13 +111,12 @@ namespace WebApp3.Controllers
         // GET: Courses/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Courses == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var course = await _context.Courses
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var course = await _courseService.GetById((int)id);
             if (course == null)
             {
                 return NotFound();
@@ -139,23 +130,15 @@ namespace WebApp3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Courses == null)
-            {
-                return Problem("Entity set 'AppDbContext.Courses'  is null.");
-            }
-            var course = await _context.Courses.FindAsync(id);
+          
+            var course = await _courseService.GetById((int)id);
             if (course != null)
             {
-                _context.Courses.Remove(course);
+                await _courseService.Delete(course);
             }
             
-            await _context.SaveChangesAsync();
+            
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool CourseExists(int id)
-        {
-          return _context.Courses.Any(e => e.Id == id);
-        }
+        }  
     }
 }
