@@ -7,34 +7,35 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApp3;
 using WebApp3.Domains;
+using WebApp3.Interfaces;
+using WebApp3.Services;
 
 namespace WebApp3.Controllers
 {
     public class SpecialsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ISpecialService _specialService;
 
-        public SpecialsController(AppDbContext context)
+        public SpecialsController(ISpecialService specialService)
         {
-            _context = context;
+            _specialService = specialService;
         }
 
         // GET: Specials
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Specials.ToListAsync());
+              return View(await _specialService.GetSpecials());
         }
 
         // GET: Specials/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Specials == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var special = await _context.Specials
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var special = await _specialService.GetById((int)id);
             if (special == null)
             {
                 return NotFound();
@@ -54,12 +55,11 @@ namespace WebApp3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Special special)
+        public async Task<IActionResult> Create(Special special)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(special);
-                await _context.SaveChangesAsync();
+                await _specialService.Create(special);
                 return RedirectToAction(nameof(Index));
             }
             return View(special);
@@ -68,12 +68,12 @@ namespace WebApp3.Controllers
         // GET: Specials/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Specials == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var special = await _context.Specials.FindAsync(id);
+            var special = await _specialService.GetById((int)id);
             if (special == null)
             {
                 return NotFound();
@@ -86,7 +86,7 @@ namespace WebApp3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Special special)
+        public async Task<IActionResult> Edit(int id, Special special)
         {
             if (id != special.Id)
             {
@@ -97,19 +97,11 @@ namespace WebApp3.Controllers
             {
                 try
                 {
-                    _context.Update(special);
-                    await _context.SaveChangesAsync();
+                    await _specialService.Edit(special);
                 }
                 catch (DbUpdateConcurrencyException)
-                {
-                    if (!SpecialExists(special.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                { 
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,18 +111,16 @@ namespace WebApp3.Controllers
         // GET: Specials/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Specials == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var special = await _context.Specials
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var special = await _specialService.GetById((int)id);
             if (special == null)
             {
                 return NotFound();
             }
-
             return View(special);
         }
 
@@ -139,23 +129,13 @@ namespace WebApp3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Specials == null)
-            {
-                return Problem("Entity set 'AppDbContext.Specials'  is null.");
-            }
-            var special = await _context.Specials.FindAsync(id);
+            var special = await _specialService.GetById((int)id);
             if (special != null)
             {
-                _context.Specials.Remove(special);
+                await _specialService.Delete(special);
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool SpecialExists(int id)
-        {
-          return _context.Specials.Any(e => e.Id == id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

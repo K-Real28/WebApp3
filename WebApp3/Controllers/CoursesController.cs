@@ -129,15 +129,13 @@ namespace WebApp3.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-          
+        {      
             var course = await _courseService.GetById((int)id);
             if (course != null)
             {
                 await _courseService.Delete(course);
             }
-            
-            
+
             return RedirectToAction(nameof(Index));
         }  
     }

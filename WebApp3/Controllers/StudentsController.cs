@@ -7,34 +7,36 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApp3;
 using WebApp3.Domains;
+using WebApp3.Interfaces;
+using WebApp3.Services;
 
 namespace WebApp3.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IStudentService _studentService;
 
-        public StudentsController(AppDbContext context)
+        public StudentsController(IStudentService studentService)
         {
-            _context = context;
+            _studentService = studentService;
         }
 
         // GET: Students
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Students.ToListAsync());
+              return View(await _studentService.GetStudents());
         }
 
         // GET: Students/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Students == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var student = await _studentService.GetById((int)id);
+
             if (student == null)
             {
                 return NotFound();
@@ -54,12 +56,11 @@ namespace WebApp3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,phone,photo")] Student student)
+        public async Task<IActionResult> Create(Student student)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(student);
-                await _context.SaveChangesAsync();
+                await _studentService.Create(student);
                 return RedirectToAction(nameof(Index));
             }
             return View(student);
@@ -68,12 +69,12 @@ namespace WebApp3.Controllers
         // GET: Students/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Students == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var student = await _context.Students.FindAsync(id);
+            var student = await _studentService.GetById((int)id);
             if (student == null)
             {
                 return NotFound();
@@ -86,7 +87,7 @@ namespace WebApp3.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,phone,photo")] Student student)
+        public async Task<IActionResult> Edit(int id, Student student)
         {
             if (id != student.Id)
             {
@@ -97,19 +98,11 @@ namespace WebApp3.Controllers
             {
                 try
                 {
-                    _context.Update(student);
-                    await _context.SaveChangesAsync();
+                    await _studentService.Edit(student);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StudentExists(student.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,13 +112,13 @@ namespace WebApp3.Controllers
         // GET: Students/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Students == null)
+            if (id == null )
             {
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var student = await _studentService.GetById((int)id);
+
             if (student == null)
             {
                 return NotFound();
@@ -139,23 +132,13 @@ namespace WebApp3.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Students == null)
-            {
-                return Problem("Entity set 'AppDbContext.Students'  is null.");
-            }
-            var student = await _context.Students.FindAsync(id);
+
+            var student = await _studentService.GetById((int)id);
             if (student != null)
             {
-                _context.Students.Remove(student);
+                await _studentService.Delete(student);
             }
-            
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool StudentExists(int id)
-        {
-          return _context.Students.Any(e => e.Id == id);
         }
     }
 }
